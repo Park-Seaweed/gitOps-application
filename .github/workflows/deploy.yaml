@@ -64,6 +64,8 @@ jobs:
           path: gitOps-config
 
       - name: Update Kubernetes resources
+        env:
+          IMAGE_TAG: ${{ steps.extract_tag_name.outputs.version }}
         run: |
           pwd
           cd gitOps-config/overlays/prd/
