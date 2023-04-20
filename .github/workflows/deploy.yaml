@@ -58,7 +58,7 @@ jobs:
         with:
           
           repository: Park-Seaweed/gitOps-config
-          ref: backend-emp
+          ref: main
           
           token: ${{ secrets.ACTION_TOKEN }}
           path: gitOps-config
