@@ -6,7 +6,7 @@ on:
 
 env:
   AWS_REGION: ap-northeast-2
-  ECR_REPOSITORY: gitOps-test
+  ECR_REPOSITORY: gitops-test
 
 jobs:
   deploy:
