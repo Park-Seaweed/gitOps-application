@@ -63,11 +63,11 @@ jobs:
           token: ${{ secrets.ACTION_TOKEN }}
           path: gitOps-config
       
-      - name: Extract tag name
+      - name: Extract tag
         id: extract_tag_name
         run: echo "##[set-output name=version;]$(echo '${{ github.ref }}' | sed 's/refs\/tags\///')"
 
-      - name: Print Image Tag
+      - name: Print Tag
         run: echo "${{ steps.extract_tag_name.outputs.version }}"
 
 
