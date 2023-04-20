@@ -62,14 +62,6 @@ jobs:
           
           token: ${{ secrets.ACTION_TOKEN }}
           path: gitOps-config
-      
-      - name: Extract tag
-        id: extract_tag_name
-        run: echo "##[set-output name=version;]$(echo '${{ github.ref }}' | sed 's/refs\/tags\///')"
-
-      - name: Print Tag
-        run: echo "${{ steps.extract_tag_name.outputs.version }}"
-
 
       - name: Update Kubernetes resources
         env:
@@ -78,8 +70,8 @@ jobs:
           pwd
           cd gitOps-config/overlays/prd/
           echo \${{ steps.login-ecr.outputs.registry }}/\${{ env.ECR_REPOSITORY }}
-          echo \${{ steps.login-ecr.outputs.registry }}/\${{ env.ECR_REPOSITORY }}:\$IMAGE_TAG
-          kustomize edit set image \${{ steps.login-ecr.outputs.registry }}/\${{ env.ECR_REPOSITORY }}=\${{ steps.login-ecr.outputs.registry }}/\${{ env.ECR_REPOSITORY }}:\$IMAGE_TAG
+          echo \${{ steps.login-ecr.outputs.registry }}/\${{ env.ECR_REPOSITORY }}:$IMAGE_TAG
+          kustomize edit set image \${{ steps.login-ecr.outputs.registry }}/\${{ env.ECR_REPOSITORY }}=\${{ steps.login-ecr.outputs.registry }}/\${{ env.ECR_REPOSITORY }}:$IMAGE_TAG
           cat kustomization.yaml
       
       - name: Commit minifest files
