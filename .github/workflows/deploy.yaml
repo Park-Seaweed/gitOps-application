@@ -7,6 +7,9 @@ on:
 
 env:
   AWS_REGION: ap-northeast-2
+  ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+  ECR_REPOSITORY: gitops-test
+  IMAGE_TAG: ${{ steps.extract_tag_name.outputs.version }}
 
 jobs:
   deploy:
@@ -39,12 +42,38 @@ jobs:
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: gitops-test
-          IMAGE_TAG: ${{ steps.extract_tag_name.outputs.version }}
+        
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
+      - name: Setup Kustomize
+        uses: imranismail/setup-kustomize@v1
+
+      - name: Checkout kustomize repository
+        uses: actions/checkout@v2
+        with:
+          
+          repository: Park-Seaweed/gitOps-config
+          ref: backend-emp
+          
+          token: ${{ secrets.ACTION_TOKEN }}
+          path: gitOps-config
+
+      - name: Update Kubernetes resources
+        run: |
+          pwd
+          cd gitOps-config/overlays/prd/
+          echo \${{ steps.login-ecr.outputs.registry }}/\${{ env.ECR_REPOSITORY }}
+          echo \${{ steps.login-ecr.outputs.registry }}/\${{ env.ECR_REPOSITORY }}:$IMAGE_TAG
+          kustomize edit set image \${{ steps.login-ecr.outputs.registry }}/\${{ env.ECR_REPOSITORY }}=\${{ steps.login-ecr.outputs.registry }}/\${{ env.ECR_REPOSITORY }}:$IMAGE_TAG
+          cat kustomization.yaml
+      
+      - name: Commit minifest files
+        run: |
+          cd gitOps-config
+          git config --global user.email "qkralsgur721@gmail.com"
+          git config --global user.name "Park-Seaweed"
+          git commit -am "Update image tag"
+          git push -u origin main
